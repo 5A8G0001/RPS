@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剪刀石頭布</title>
+
+    <style>
+        .menu{
+            padding: 10px;
+            background-color:cornsilk;
+        }
+        .container{
+            padding: 10px;
+            background-color: aquamarine;
+            display: flex;
+        }
+        .user-Interface{
+            padding: 5px;
+            border: 1px solid blue;
+            width: 165px;
+            height: 300px;
+        }
+        .computer-Interface{
+            padding: 5px;
+            border: 1px solid red;
+            width: 165px;
+            height: 300px;
+        }
+        .state-Menu{
+            text-align: center;
+            padding: 5px;
+            border: 1px solid lightpink;
+            width: 480px;
+            height: 295;
+        }
+        .win{
+            background-color: red;
+            color: yellow;
+        }
+        .lose{
+            background-color: black;
+            color: white;
+        }
+        .tie{
+            background-color: white;
+            color: black;
+        }
+    </style>
+
+    <script>
+        var round = 1; // 總回合數
+        var winCount = 0; // 勝局次數 
+        var loseCount = 0; // 敗局次數
+        var tieCount = 0; // 平局次數
+        var winRate = 100;
+        var msg_list = "";
+        function shoot()
+        {
+            let user_choice = document.querySelector("input[name='rps-radio']:checked").value;
+            //window.alert(user_choice);
+            let mc_list = ['scissors','rock','paper'];
+            let rps_dic = {
+                'scissors': '剪刀',
+                'rock': '石頭',
+                'paper': '布'
+            }
+            let mc_choice = mc_list[Math.floor(Math.random() * 3)];
+            let ret = "";
+
+            document.getElementById('comp-Img').src=mc_choice+".PNG";
+
+            if(user_choice == 'scissors')
+            {
+                switch(mc_choice)
+                {
+                    case 'scissors':
+                        ret = "平手";
+                        break;
+                    case 'rock':
+                        ret = "輸";
+                        break;
+                    case 'paper':
+                        ret = "贏";
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if(user_choice == 'rock')
+            {
+                switch(mc_choice)
+                {
+                    case 'scissors':
+                        ret = "贏";
+                        break;
+                    case 'rock':
+                        ret = "平手";
+                        break;
+                    case 'paper':
+                        ret = "輸";
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if(user_choice == 'paper')
+            {
+                switch(mc_choice)
+                {
+                    case 'scissors':
+                        ret = "輸";
+                        break;
+                    case 'rock':
+                        ret = "贏";
+                        break;
+                    case 'paper':
+                        ret = "平手";
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if(ret == "贏")
+            {
+                document.getElementById("ret-msg").className="win";
+                winCount++;
+            }
+            else if(ret == "輸")
+            {
+                document.getElementById("ret-msg").className="lose";
+                loseCount++;
+            }
+            else if(ret == "平手")
+            {
+                document.getElementById("ret-msg").className="tie";
+                tieCount++;
+            }
+            if(winCount+loseCount!=0)
+            {
+                winRate = winCount / (winCount+loseCount);
+                winRate = winRate.toFixed(2);
+                winRate*=100;
+            }
+            msg_list += `第${round}回合，${winCount}/${loseCount}/${tieCount}(W/L/T)，勝率:${winRate}%。你出${rps_dic[user_choice]},電腦出${rps_dic[mc_choice]}。結果:${ret}`+"</br>";
+            document.getElementById("round-state").innerHTML=`第${round}回合，${winCount}/${loseCount}/${tieCount}(W/L/T)，勝率:${winRate}%`;
+            document.getElementById("ret-msg").innerHTML=`你出${rps_dic[user_choice]},電腦出${rps_dic[mc_choice]}。結果:${ret}`;
+            document.getElementById("msg-list").innerHTML = msg_list;
+            round++;
+
+        }
+
+        function s_change()
+        {
+            document.getElementById('Img').src="scissors.PNG";
+            
+        }
+        function r_change()
+        {
+            document.getElementById('Img').src="rock.PNG";
+            
+        }
+        function p_change()
+        {
+            document.getElementById('Img').src="paper.PNG";
+            
+        }
+        
+    </script>
+</head>
+
+
+
+<body>
+    <div class="menu">
+        <table>
+            <tr>
+                <td>
+                    <p>玩家名稱:</p>
+                    <td><input type="text"></td>
+                </td>
+
+                <td>
+                    <button>登入</button>
+                </td>
+
+                <td>
+                    <button>查詢對局資訊</button>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+
+    <div class="container">
+        <div class="user-Interface">
+            <h1 style="text-align: center;">玩家</h1>
+            <img src="scissors.PNG" id="Img" width="150" height="150">
+        </br>
+            <input type="radio" name="rps-radio" value="scissors" checked="checked" onclick="s_change()">剪刀</input>
+            <input type="radio" name="rps-radio" value="rock" onclick="r_change()">石頭</input>
+            <input type="radio" name="rps-radio" value="paper" onclick="p_change()">布</input>
+        </br>
+            <button onclick="shoot()">出拳</button>
+        </div>
+
+        <div class="state-Menu">
+            
+            <h1>對局資訊</h1>
+            <h2 id="round-state" style="text-align:center;"></h2>
+            <h1 id="ret-msg">---</h1>
+            <p id="msg-list">---</p>
+        </div>
+
+        <div class="computer-Interface">
+            <h1 style="text-align: center;">電腦</h1>
+            <img src="scissors.PNG" id="comp-Img" width="150" height="150">
+        <!--
+        </br>
+            <input type="radio" name="rps-radio" value="scissors" checked="checked" onclick="s_change()">剪刀</input>
+            <input type="radio" name="rps-radio" value="rock" onclick="r_change()">石頭</input>
+            <input type="radio" name="rps-radio" value="paper" onclick="p_change()">布</input>
+        </br>
+            <button onclick="shoot()">出拳</button>
+        -->
+        
+        </div>
+
+        <div>
+            <h1>玩家列表</h1>
+        </div>
+
+    </div>
+    
+</body>
+</html>
