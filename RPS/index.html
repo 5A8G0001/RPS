@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+    <!--5A8G0001-->
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,6 +8,14 @@
     <title>剪刀石頭布</title>
 
     <style>
+        .state-search-Menu{
+            padding: 5px;
+            border: 1px solid red;
+            width: 165px;
+        }
+        table,tr,td {
+            border: 1px solid black;
+        }
         .menu{
             padding: 10px;
             background-color:cornsilk;
@@ -20,11 +29,18 @@
             padding: 5px;
             border: 1px solid blue;
             width: 165px;
-            height: 300px;
+            height: 350px;
         }
         .computer-Interface{
             padding: 5px;
             border: 1px solid red;
+            width: 165px;
+            height: 350px;
+        }
+        .user-list-Interface{
+            text-align: center;
+            padding: 5px;
+            border: 1px solid black;
             width: 165px;
             height: 300px;
         }
@@ -50,27 +66,56 @@
     </style>
 
     <script>
+        
+        /**玩家資料**/
+        class Player{
+            constructor(name,round,winCount,loseCount,tieCount,winRate,msg_list,ct){
+                this.name = name; //玩家名稱
+                this.round = round;
+                this.winCount = winCount;
+                this.loseCount = loseCount;
+                this.tieCount = tieCount;
+                this.winRate = winRate;
+                this.msg_list = msg_list;
+                this.ct = ct; // 登入次數
+                
+            }
+        };
+        var user_Name = ""; // 當前玩家得名稱
+        var user_map = new Map(); // 儲存所有玩家的map
+
+        
         var round = 1; // 總回合數
         var winCount = 0; // 勝局次數 
         var loseCount = 0; // 敗局次數
         var tieCount = 0; // 平局次數
-        var winRate = 100;
-        var msg_list = "";
-        function shoot()
+        var winRate = 100; // 勝率
+        var msg_list = ""; // 對局訊息
+        var player; // 玩家資料
+        var search_ret;
+        function shoot() // 出拳
         {
-            let user_choice = document.querySelector("input[name='rps-radio']:checked").value;
-            //window.alert(user_choice);
-            let mc_list = ['scissors','rock','paper'];
+            if(user_Name == "")
+            {
+                window.alert('請先登入');
+                return ;
+            }
+            let user_choice = document.querySelector("input[name='rps-radio']:checked").value; // 取得玩家選擇
+            
+            let mc_list = ['scissors','rock','paper']; // 電腦隨機取數出拳對照表
+
+            //英文轉中文顯示對照表
             let rps_dic = {
                 'scissors': '剪刀',
                 'rock': '石頭',
                 'paper': '布'
             }
-            let mc_choice = mc_list[Math.floor(Math.random() * 3)];
-            let ret = "";
+            let mc_choice = mc_list[Math.floor(Math.random() * 3)]; // 取得電腦選擇
+            let ret = ""; // 輸/贏
 
-            document.getElementById('comp-Img').src=mc_choice+".PNG";
+            document.getElementById('comp-Img').src=mc_choice+".PNG"; // 設定電腦出拳的對應圖片
 
+            /**以下對應玩家選擇剪刀、石頭、布的勝負判斷**/
             if(user_choice == 'scissors')
             {
                 switch(mc_choice)
@@ -122,6 +167,7 @@
                         break;
                 }
             }
+            /** 判斷勝負後更改對應結果顯示色彩，以及改變勝負平手的次數 **/
             if(ret == "贏")
             {
                 document.getElementById("ret-msg").className="win";
@@ -137,20 +183,38 @@
                 document.getElementById("ret-msg").className="tie";
                 tieCount++;
             }
+            /** 計算勝率 **/
             if(winCount+loseCount!=0)
             {
                 winRate = winCount / (winCount+loseCount);
                 winRate = winRate.toFixed(2);
                 winRate*=100;
             }
+
             msg_list += `第${round}回合，${winCount}/${loseCount}/${tieCount}(W/L/T)，勝率:${winRate}%。你出${rps_dic[user_choice]},電腦出${rps_dic[mc_choice]}。結果:${ret}`+"</br>";
             document.getElementById("round-state").innerHTML=`第${round}回合，${winCount}/${loseCount}/${tieCount}(W/L/T)，勝率:${winRate}%`;
             document.getElementById("ret-msg").innerHTML=`你出${rps_dic[user_choice]},電腦出${rps_dic[mc_choice]}。結果:${ret}`;
             document.getElementById("msg-list").innerHTML = msg_list;
             round++;
-
+            /**刷新玩家資料**/
+            player.round = round;
+            player.winCount = winCount;
+            player.loseCount = loseCount;
+            player.tieCount = tieCount;
+            player.winRate = winRate;
+            player.msg_list = msg_list;
+            user_map.set(user_Name,player); //這行沒有竟然也不會錯，在設定時可能給的是記憶體位置
         }
-
+        function init()//初始化對局資料
+        {
+            round = 1; // 總回合數
+            winCount = 0; // 勝局次數 
+            loseCount = 0; // 敗局次數
+            tieCount = 0; // 平局次數
+            winRate = 100; // 勝率
+            msg_list = ""; // 對局訊息
+        }
+        /** 玩家選擇時切換圖片 **/
         function s_change()
         {
             document.getElementById('Img').src="scissors.PNG";
@@ -166,6 +230,76 @@
             document.getElementById('Img').src="paper.PNG";
             
         }
+        /** 登入不同的玩家 **/
+        function login()
+        {
+            let name = document.getElementById('user-input').value;
+            if(name == "")
+            {
+                window.alert('請輸入正確名稱');
+                return ;
+            }
+        
+            user_Name = name;
+            document.getElementById('user-name').innerHTML = `${user_Name}`;
+            document.getElementById('ret-msg').innerHTML = "---";
+            document.getElementById('ret-msg').className = null;
+            //判斷是不是新玩家
+            if(user_map.has(user_Name))
+            {
+                player = user_map.get(user_Name);
+                player.ct++;
+                user_map.set(user_Name, player);
+                player = null;
+            }
+            else
+            {
+                player = new Player(user_Name,1,0,0,0,100,"",1);
+                user_map.set(user_Name,player);
+                init();
+                document.getElementById('ret-msg').innerHTML = "---";
+                player = null;
+            }
+            /**更新玩家名單**/
+            let userList = "<table style='margin: auto; width: 100px'>";
+            for(let key of user_map.keys())
+            {
+                if(key == user_Name)
+                {
+                    userList += `<tr> <td style='color: red'>${key}</td> </tr>`;    
+                    continue;
+                }
+                userList += `<tr> <td>${key}</td> </tr>`;
+            }
+            userList += "</table>";
+            document.getElementById('user-list').innerHTML = userList;
+            
+            player = user_map.get(user_Name);
+            document.getElementById('round-state').innerHTML = `第${player.round}回合，${player.winCount}/${player.loseCount}/${player.tieCount}(W/L/T)，勝率:${player.winRate}%`;
+            document.getElementById("msg-list").innerHTML = player.msg_list;
+        }
+
+        //搜索其他玩家的資料
+        function search()
+        {
+            let userName = document.getElementById('user-input').value;
+            if(userName == "")
+            {
+                window.alert('請輸入正確名稱');
+                return ;
+            }
+            if(!user_map.has(userName))
+            {
+                window.alert('沒有您所查詢的玩家'+userName+'的資料');
+                return ;
+            }
+            search_ret = user_map.get(userName);
+            document.getElementById('ss-1').innerHTML = "查詢結果";
+            document.getElementById('data-name').innerHTML = search_ret.name;
+            document.getElementById('data-round-state').innerHTML = `共${search_ret.round-1}回合，${search_ret.winCount}/${search_ret.loseCount}/${search_ret.tieCount}(W/L/T)，勝率:${search_ret.winRate}%`;;
+            document.getElementById('data-msg-list').innerHTML = search_ret.msg_list;
+
+        }
         
     </script>
 </head>
@@ -178,15 +312,15 @@
             <tr>
                 <td>
                     <p>玩家名稱:</p>
-                    <td><input type="text"></td>
+                    <td><input type="text" id="user-input"></td>
                 </td>
 
                 <td>
-                    <button>登入</button>
+                    <button onclick="login()">登入</button>
                 </td>
 
                 <td>
-                    <button>查詢對局資訊</button>
+                    <button onclick="search()">查詢對局資訊</button>
                 </td>
             </tr>
 
@@ -195,7 +329,7 @@
 
     <div class="container">
         <div class="user-Interface">
-            <h1 style="text-align: center;">玩家</h1>
+            <h1 style="text-align: center;" id="user-name">玩家:</h1>
             <img src="scissors.PNG" id="Img" width="150" height="150">
         </br>
             <input type="radio" name="rps-radio" value="scissors" checked="checked" onclick="s_change()">剪刀</input>
@@ -227,8 +361,17 @@
         
         </div>
 
-        <div>
+        <div class="user-list-Interface">
             <h1>玩家列表</h1>
+            <p id="user-list"></p>
+        </div>
+
+        <div class="state-search-Menu">
+            
+            <h1 id="ss-1" style="text-align: center;"></h1>
+            <h2 id="data-name" style="text-align: center;"></h2>
+            <h2 id="data-round-state" style="text-align:center;"></h2>
+            <p id="data-msg-list" style="text-align: center;"></p>
         </div>
 
     </div>
